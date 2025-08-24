@@ -83,14 +83,14 @@ class ContentRequest(BaseModel):
     def validate_content_type(cls, v):
         valid_types = ["مطوية", "بحث", "ملخص", "خطة عمل", "محتوى لوسائل التواصل الاجتماعي"]
         if v not in valid_types:
-            raise ValueError(f"نوع المحتوى غير صالح. الأنواع المتاحة: {", ".join(valid_types)}")
+            raise ValueError(f"نوع المحتوى غير صالح. الأنواع المتاحة: {', '.join(valid_types)}")
         return v
 
     @validator("contentLength")
     def validate_content_length(cls, v):
         valid_lengths = ["موجز جداً", "مختصر", "متوسط", "مفصل", "شامل"]
         if v not in valid_lengths:
-            raise ValueError(f"طول المحتوى غير صالح. الأطوال المتاحة: {", ".join(valid_lengths)}")
+            raise ValueError(f"طول المحتوى غير صالح. الأطوال المتاحة: {', '.join(valid_lengths)}")
         return v
 
 # --- Helper Functions --- #
