@@ -1,0 +1,22 @@
+# ملف تكوين Git لإدارة الحسابات المتعددة
+# انسخ هذا الملف إلى ~/.gitconfig أو استخدمه كمرجع
+
+[user]
+    # الإعدادات الافتراضية
+    name = salehajamah
+    email = salehajamah@gmail.com
+
+# إعدادات خاصة بمشاريع معينة
+[includeIf "gitdir:~/Desktop/pro/brochure-bot/"]
+    path = ~/.gitconfig-brochure-bot
+
+[includeIf "gitdir:~/Desktop/pro/other-project/"]
+    path = ~/.gitconfig-other-project
+
+# إعدادات SSH Keys
+[core]
+    sshCommand = ssh -i ~/.ssh/id_ed25519_salehajamah
+
+# إعدادات Credential Helper
+[credential]
+    helper = manager-core
