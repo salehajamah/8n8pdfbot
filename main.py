@@ -42,15 +42,20 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to set webhook: {e}")
             logger.warning("Falling back to polling mode")
-            asyncio.create_task(application.run_polling())
+            # Start polling in background without blocking
+            asyncio.create_task(start_polling())
     else:
         logger.warning("WEB_APP_URL is not set or is default. Telegram bot will use polling.")
-        asyncio.create_task(application.run_polling())
+        # Start polling in background without blocking
+        asyncio.create_task(start_polling())
     
     yield
     
     # Shutdown
     logger.info("Shutting down application...")
+    # Stop polling if running
+    if hasattr(app.state, 'polling_task'):
+        app.state.polling_task.cancel()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -119,6 +124,16 @@ class ContentRequest(BaseModel):
         return v
 
 # --- Helper Functions --- #
+async def start_polling():
+    """Start polling in background without blocking the main event loop"""
+    try:
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()
+        logger.info("Telegram bot polling started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start polling: {e}")
+
 async def generate_openai_content(prompt: str, model: str = "gpt-3.5-turbo", temperature: float = 0.7, max_tokens: int = 1000) -> str:
     try:
         response = await openai.ChatCompletion.acreate(
