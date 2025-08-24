@@ -1,0 +1,33 @@
+# Dockerfile بديل في حالة احتجت إليه
+FROM python:3.11-slim
+
+# تثبيت المكتبات المطلوبة للنظام
+RUN apt-get update && apt-get install -y \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libharfbuzz0b \
+    libfontconfig1 \
+    libgdk-pixbuf2.0-0 \
+    libffi-dev \
+    libcairo2 \
+    libxml2 \
+    libxslt1-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# تعيين مجلد العمل
+WORKDIR /app
+
+# نسخ ملفات المتطلبات
+COPY requirements.txt .
+
+# تثبيت المكتبات
+RUN pip install --no-cache-dir -r requirements.txt
+
+# نسخ باقي الملفات
+COPY . .
+
+# تعيين المنفذ
+EXPOSE 8000
+
+# تشغيل التطبيق
+CMD ["python", "main.py"]
