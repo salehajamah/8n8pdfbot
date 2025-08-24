@@ -205,8 +205,11 @@ async def generate_pdf(html_content: str, is_free_version: bool = True) -> bytes
 
 # --- Telegram Bot Handlers --- #
 async def start_command(update: Update, context: telegram.ext.CallbackContext) -> None:
+    # Use the actual deployed URL if WEB_APP_URL is not set
+    webapp_url = WEB_APP_URL if WEB_APP_URL and WEB_APP_URL != "https://your-app-name.onrender.com" else "https://eightn8pdfbot.onrender.com"
+    
     keyboard = [
-        [InlineKeyboardButton("🚀 ابدأ مشروعًا جديدًا", web_app=WebAppInfo(url=WEB_APP_URL))]
+        [InlineKeyboardButton("🚀 ابدأ مشروعًا جديدًا", web_app=WebAppInfo(url=webapp_url))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
