@@ -38,17 +38,12 @@ document.addEventListener('DOMContentLoaded', function() {
     addFieldButton.addEventListener('click', function() {
         const fieldGroup = document.createElement('div');
         fieldGroup.classList.add('custom-field-group');
-        fieldGroup.style.marginBottom = '10px';
-        fieldGroup.style.padding = '10px';
-        fieldGroup.style.border = '1px solid #ddd';
-        fieldGroup.style.borderRadius = '5px';
-        fieldGroup.style.backgroundColor = '#f9f9f9';
         
         fieldGroup.innerHTML = `
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <input type="text" class="custom-field-label" placeholder="اسم الحقل (مثال: الصف)" style="flex: 1; min-width: 150px;">
                 <input type="text" class="custom-field-value" placeholder="قيمة الحقل (مثال: الثالث الابتدائي)" style="flex: 1; min-width: 150px;">
-                <button type="button" class="remove-field-button" style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">إزالة</button>
+                <button type="button" class="remove-field-button">إزالة</button>
             </div>
         `;
         customFieldsContainer.appendChild(fieldGroup);
@@ -98,6 +93,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             console.log('Sending request:', requestData);
+            
+            // Show loading state
+            statusMessage.textContent = 'جاري إرسال طلبك...';
+            statusMessage.style.color = 'blue';
+            
             const response = await fetch('/generate-content', {
                 method: 'POST',
                 headers: {
@@ -107,6 +107,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const result = await response.json();
             console.log('Response result:', result);
 
