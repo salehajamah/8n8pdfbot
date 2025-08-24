@@ -2,10 +2,11 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
+from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any
 import openai
 import telegram
@@ -30,7 +31,28 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 TELEGRAM_PROVIDER_TOKEN = os.getenv("TELEGRAM_PROVIDER_TOKEN")
 
 # --- Initialize Components --- #
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    if WEB_APP_URL and WEB_APP_URL != "https://your-app-name.onrender.com":
+        try:
+            webhook_url = f"{WEB_APP_URL}/telegram-webhook"
+            await bot.set_webhook(url=webhook_url)
+            logger.info(f"Telegram webhook set to: {webhook_url}")
+        except Exception as e:
+            logger.error(f"Failed to set webhook: {e}")
+            logger.warning("Falling back to polling mode")
+            asyncio.create_task(application.run_polling())
+    else:
+        logger.warning("WEB_APP_URL is not set or is default. Telegram bot will use polling.")
+        asyncio.create_task(application.run_polling())
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down application...")
+
+app = FastAPI(lifespan=lifespan)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -73,20 +95,23 @@ class ContentRequest(BaseModel):
     telegram_chat_id: Optional[int] = Field(None, description="معرف الدردشة الخاص بالمستخدم في تليجرام")
     telegram_user_id: Optional[int] = Field(None, description="معرف المستخدم الخاص بالمستخدم في تليجرام")
 
-    @validator("mainTopic")
+    @field_validator("mainTopic")
+    @classmethod
     def validate_topic_content(cls, v):
         if not v.strip():
             raise ValueError("الموضوع الرئيسي لا يمكن أن يكون فارغاً.")
         return v
 
-    @validator("contentType")
+    @field_validator("contentType")
+    @classmethod
     def validate_content_type(cls, v):
         valid_types = ["مطوية", "بحث", "ملخص", "خطة عمل", "محتوى لوسائل التواصل الاجتماعي"]
         if v not in valid_types:
             raise ValueError(f"نوع المحتوى غير صالح. الأنواع المتاحة: {', '.join(valid_types)}")
         return v
 
-    @validator("contentLength")
+    @field_validator("contentLength")
+    @classmethod
     def validate_content_length(cls, v):
         valid_lengths = ["موجز جداً", "مختصر", "متوسط", "مفصل", "شامل"]
         if v not in valid_lengths:
@@ -204,18 +229,7 @@ async def successful_payment_callback(update: Update, context: telegram.ext.Call
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-@app.on_event("startup")
-async def startup_event():
-    # Set up Telegram webhook
-    webhook_url = f"{WEB_APP_URL}/telegram-webhook"
-    await bot.set_webhook(url=webhook_url)
-    logger.info(f"Telegram webhook set to: {webhook_url}")
 
-    # Start Telegram bot polling in background if webhook is not set
-    # This is primarily for local development without public URL
-    if not WEB_APP_URL:
-        logger.warning("WEB_APP_URL is not set. Telegram bot will use polling. This is not recommended for production.")
-        asyncio.create_task(application.run_polling())
 
 @app.post("/telegram-webhook")
 async def telegram_webhook(request: Request):
