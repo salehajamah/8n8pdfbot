@@ -110,7 +110,7 @@ class ContentRequest(BaseModel):
     @field_validator("contentType")
     @classmethod
     def validate_content_type(cls, v):
-        valid_types = ["مطوية", "بحث", "ملخص", "خطة عمل", "محتوى لوسائل التواصل الاجتماعي"]
+        valid_types = ["مطوية", "بحث مدرسي", "ملخص لكتاب", "خطة عمل لمشروع", "محتوى لمنشور على وسائل التواصل الاجتماعي"]
         if v not in valid_types:
             raise ValueError(f"نوع المحتوى غير صالح. الأنواع المتاحة: {', '.join(valid_types)}")
         return v
@@ -247,6 +247,14 @@ async def successful_payment_callback(update: Update, context: telegram.ext.Call
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/contact.html", response_class=HTMLResponse)
+async def contact(request: Request):
+    return templates.TemplateResponse("contact.html", {"request": request})
+
+@app.get("/privacy.html", response_class=HTMLResponse)
+async def privacy(request: Request):
+    return templates.TemplateResponse("privacy.html", {"request": request})
 
 
 @app.post("/telegram-webhook")

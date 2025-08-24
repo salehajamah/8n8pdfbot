@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Populate content type dropdown
-    const contentTypes = ["مطوية", "بحث", "ملخص", "خطة عمل", "محتوى لوسائل التواصل الاجتماعي"];
-    const contentTypeSelect = document.getElementById('contentType');
+    const contentTypes = ["مطوية", "بحث مدرسي", "ملخص لكتاب", "خطة عمل لمشروع", "محتوى لمنشور على وسائل التواصل الاجتماعي"];
+    const contentTypeSelect = document.getElementById('outputType');
     contentTypes.forEach(type => {
         const option = document.createElement('option');
         option.value = type;
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Populate content length dropdown
-    const contentLengths = ["موجز جداً", "مختصر", "متوسط", "مفصل", "شامل"];
+    const contentLengths = ["موجز جدًا", "مختصر", "متوسط", "مفصل", "شامل"];
     const contentLengthSelect = document.getElementById('contentLength');
     contentLengths.forEach(length => {
         const option = document.createElement('option');
@@ -38,10 +38,18 @@ document.addEventListener('DOMContentLoaded', function() {
     addFieldButton.addEventListener('click', function() {
         const fieldGroup = document.createElement('div');
         fieldGroup.classList.add('custom-field-group');
+        fieldGroup.style.marginBottom = '10px';
+        fieldGroup.style.padding = '10px';
+        fieldGroup.style.border = '1px solid #ddd';
+        fieldGroup.style.borderRadius = '5px';
+        fieldGroup.style.backgroundColor = '#f9f9f9';
+        
         fieldGroup.innerHTML = `
-            <input type="text" class="custom-field-label" placeholder="اسم الحقل (مثال: الصف)">
-            <input type="text" class="custom-field-value" placeholder="قيمة الحقل (مثال: الثالث الابتدائي)">
-            <button type="button" class="remove-field-button">إزالة</button>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" class="custom-field-label" placeholder="اسم الحقل (مثال: الصف)" style="flex: 1; min-width: 150px;">
+                <input type="text" class="custom-field-value" placeholder="قيمة الحقل (مثال: الثالث الابتدائي)" style="flex: 1; min-width: 150px;">
+                <button type="button" class="remove-field-button" style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">إزالة</button>
+            </div>
         `;
         customFieldsContainer.appendChild(fieldGroup);
 
@@ -56,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
         statusMessage.style.color = 'blue';
 
         const mainTopic = document.getElementById('mainTopic').value;
-        const contentType = document.getElementById('contentType').value;
+        const contentType = document.getElementById('outputType').value;
         const contentLength = document.getElementById('contentLength').value;
         const telegramChatId = document.getElementById('telegramChatId').value;
         const telegramUserId = document.getElementById('telegramUserId').value;
@@ -89,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
+            console.log('Sending request:', requestData);
             const response = await fetch('/generate-content', {
                 method: 'POST',
                 headers: {
@@ -97,16 +106,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(requestData)
             });
 
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response result:', result);
 
             if (response.ok) {
-                statusMessage.textContent = 'تم إرسال طلبك بنجاح! تحقق من بوت تليجرام الخاص بك.';
+                statusMessage.textContent = 'تم إرسال طلبك بنجاح! تحقق من بوت تليجرام الخاص بك للحصول على المحتوى.';
                 statusMessage.style.color = 'green';
-                Telegram.WebApp.close(); // Close WebApp on success
+                
+                // Close WebApp after a short delay to show success message
+                setTimeout(() => {
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.close();
+                    }
+                }, 2000);
             } else if (response.status === 402 && result.invoice_sent) {
                 statusMessage.textContent = 'يرجى إتمام عملية الدفع في تليجرام للحصول على المحتوى المميز.';
                 statusMessage.style.color = 'orange';
-                Telegram.WebApp.openInvoice(result.invoice_url); // If invoice URL is provided
+                if (result.invoice_url && window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.openInvoice(result.invoice_url);
+                }
             } else {
                 statusMessage.textContent = `خطأ: ${result.detail || result.message || 'حدث خطأ غير معروف.'}`;
                 statusMessage.style.color = 'red';
