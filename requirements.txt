@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-telegram-bot
+openai
+weasyprint
+python-multipart
+redis
+python-dotenv
+
+

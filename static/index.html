@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ المحتوى الذكي</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js/gtag.js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-XXXXXXXXXX'); // استبدل هذا بالمعرّف الخاص بك
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>منشئ المحتوى الذكي</h1>
+        <form id="contentForm">
+            <input type="hidden" id="telegramUserId">
+            <input type="hidden" id="telegramChatId">
+            <div class="form-group">
+                <label for="outputType">نوع المخرج المطلوب *</label>
+                <select id="outputType" required>
+                    <option value="">اختر</option>
+                    <option value="مطوية">مطوية</option>
+                    <option value="بحث مدرسي">بحث مدرسي</option>
+                    <option value="ملخص لكتاب">ملخص لكتاب</option>
+                    <option value="خطة عمل لمشروع">خطة عمل لمشروع</option>
+                    <option value="محتوى لمنشور على وسائل التواصل الاجتماعي">محتوى لمنشور على وسائل التواصل الاجتماعي</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mainTopic">الموضوع الرئيسي *</label>
+                <input type="text" id="mainTopic" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contentLength">حجم المحتوى المطلوب *</label>
+                <select id="contentLength" required>
+                    <option value="موجز جدًا">موجز جدًا (مجاني)</option>
+                    <option value="مختصر">مختصر</option>
+                    <option value="متوسط">متوسط</option>
+                    <option value="مفصل">مفصل</option>
+                    <option value="شامل">شامل</option>
+                </select>
+            </div>
+
+            <h2>خيارات الأسلوب (اختياري)</h2>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="useEmoji">
+                <label for="useEmoji">استخدام الرموز التعبيرية (إيموجي) 😃</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="simpleLanguage">
+                <label for="simpleLanguage">استخدام لغة بسيطة ومباشرة (مناسبة للأطفال)</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="academicLanguage">
+                <label for="academicLanguage">استخدام لغة أكاديمية ورسمية (مناسبة للأبحاث)</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="bulletPoints">
+                <label for="bulletPoints">تنظيم المحتوى على شكل نقاط رئيسية</label>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="discussionQuestions">
+                <label for="discussionQuestions">إضافة قسم "أسئلة للمناقشة" في النهاية</label>
+            </div>
+
+            <h2>معلومات إضافية (اختياري)</h2>
+            <div id="additionalFields"></div>
+            <button type="button" id="addAdditionalField" class="btn secondary-btn">+ إضافة معلومة إضافية</button>
+
+            <button type="submit" class="btn primary-btn">إنشاء المحتوى</button>
+            <div id="statusMessage" style="margin: 10px 0; color: blue;"></div>
+        </form>
+    </div>
+
+    <footer>
+        <a href="/privacy.html">سياسة الخصوصية</a> |
+        <a href="/contact.html">تواصل معنا</a>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
+
+

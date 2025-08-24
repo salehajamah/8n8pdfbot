@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>المطوية/البحث</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+            @top-center {
+                content: "منشئ المحتوى الذكي - AI Content Creator";
+                font-family: 'Tajawal', sans-serif;
+                font-size: 9pt;
+                color: #666;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 5px;
+            }
+            @bottom-center {
+                content: "صفحة " counter(page) " من " counter(pages);
+                font-family: 'Tajawal', sans-serif;
+                font-size: 8pt;
+                color: #888;
+                border-top: 1px solid #ddd;
+                padding-top: 5px;
+            }
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            font-size: 11pt;
+            text-align: justify;
+        }
+
+        /* Main Title Styling */
+        .main-title {
+            font-size: 28pt;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2cm;
+            color: #1a365d;
+            padding: 20px;
+            border: 3px solid #4a90e2;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            page-break-after: avoid;
+        }
+
+        /* Section Headers */
+        h1 {
+            font-size: 22pt;
+            font-weight: 700;
+            color: #2d3748;
+            margin-top: 1.5cm;
+            margin-bottom: 0.8cm;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 8px;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #2b6cb0;
+            margin-top: 1.2cm;
+            margin-bottom: 0.6cm;
+            border-right: 5px solid #4a90e2;
+            padding-right: 15px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 14pt;
+            font-weight: 500;
+            color: #2c5282;
+            margin-top: 1cm;
+            margin-bottom: 0.4cm;
+            page-break-after: avoid;
+        }
+
+        /* Paragraph Styling */
+        p {
+            margin-bottom: 1.2em;
+            text-align: justify;
+            text-indent: 1cm;
+        }
+
+        /* List Styling */
+        ul, ol {
+            margin-bottom: 1.2em;
+            padding-right: 25px;
+        }
+
+        li {
+            margin-bottom: 0.6em;
+            line-height: 1.6;
+        }
+
+        ul li {
+            list-style-type: none;
+            position: relative;
+        }
+
+        ul li:before {
+            content: "●";
+            color: #4a90e2;
+            font-weight: bold;
+            position: absolute;
+            right: -20px;
+        }
+
+        ol li {
+            margin-bottom: 0.8em;
+        }
+
+        /* Special Sections */
+        .discussion-questions {
+            background-color: #f7fafc;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 1.5cm 0;
+            page-break-inside: avoid;
+        }
+
+        .discussion-questions h3 {
+            color: #2b6cb0;
+            margin-top: 0;
+            text-align: center;
+            font-size: 16pt;
+        }
+
+        .key-points {
+            background-color: #fff5f5;
+            border-right: 5px solid #e53e3e;
+            padding: 15px;
+            margin: 1cm 0;
+            page-break-inside: avoid;
+        }
+
+        /* Quote/Highlight Styling */
+        blockquote {
+            background-color: #edf2f7;
+            border-right: 4px solid #4a90e2;
+            padding: 15px 20px;
+            margin: 1cm 0;
+            font-style: italic;
+            page-break-inside: avoid;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1cm 0;
+            page-break-inside: avoid;
+        }
+
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 8px 12px;
+            text-align: right;
+        }
+
+        th {
+            background-color: #4a90e2;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+
+        /* Ensure elements don't break across pages awkwardly */
+        h1, h2, h3, .discussion-questions, .key-points, blockquote, table {
+            page-break-inside: avoid;
+        }
+
+        /* Watermark styling */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 60pt;
+            font-weight: 300;
+            color: rgba(74, 144, 226, 0.08);
+            z-index: -1;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        /* Footer info */
+        .document-footer {
+            margin-top: 2cm;
+            padding-top: 1cm;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            font-size: 9pt;
+            color: #718096;
+            page-break-inside: avoid;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Emoji styling */
+        .emoji {
+            font-size: 1.2em;
+            margin: 0 2px;
+        }
+
+        /* Responsive adjustments for different content lengths */
+        .brief-content {
+            font-size: 12pt;
+            line-height: 1.9;
+        }
+
+        .detailed-content {
+            font-size: 10pt;
+            line-height: 1.7;
+        }
+
+        /* Print-specific adjustments */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Watermark (will be conditionally added/removed by Python based on payment) -->
+    <div class="watermark">نسخة مجانية</div>
+
+    <!-- Main Content Container -->
+    <div class="content-wrapper">
+        <!-- Main content will be injected here by Python -->
+        {{GENERATED_CONTENT}}
+        
+        <!-- Document Footer -->
+        <div class="document-footer">
+            <p>تم إنشاء هذا المحتوى باستخدام منشئ المحتوى الذكي</p>
+            <p>AI Content Creator - Powered by OpenAI</p>
+        </div>
+    </div>
+</body>
+</html>
+
+
