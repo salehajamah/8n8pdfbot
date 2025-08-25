@@ -42,7 +42,7 @@
             <div class="form-group">
                 <label for="contentLength">حجم المحتوى المطلوب *</label>
                 <select id="contentLength" required>
-                    <option value="موجز جدًا">موجز جدًا (مجاني)</option>
+                    <option value="موجز جداً">موجز جداً (مجاني)</option>
                     <option value="مختصر">مختصر</option>
                     <option value="متوسط">متوسط</option>
                     <option value="مفصل">مفصل</option>
@@ -73,8 +73,14 @@
             </div>
 
             <h2>معلومات إضافية (اختياري)</h2>
-            <div id="additionalFields"></div>
-            <button type="button" id="addAdditionalField" class="btn secondary-btn">+ إضافة معلومة إضافية</button>
+            <div class="form-group">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="newCustomLabel" placeholder="اسم الحقل (مثال: الصف)" style="flex: 1; min-width: 150px;">
+                    <input type="text" id="newCustomValue" placeholder="قيمة الحقل (مثال: الرابع الابتدائي)" style="flex: 1; min-width: 150px;">
+                    <button type="button" id="addCustomField" class="btn secondary-btn">إضافة</button>
+                </div>
+            </div>
+            <div id="additionalFieldsList"></div>
 
             <button type="submit" class="btn primary-btn">إنشاء المحتوى</button>
             <div id="statusMessage" style="margin: 10px 0; color: blue;"></div>

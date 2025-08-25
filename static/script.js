@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('contentForm');
-    const addFieldButton = document.getElementById('addAdditionalField');
-    const customFieldsContainer = document.getElementById('additionalFields');
+    const addCustomFieldBtn = document.getElementById('addCustomField');
+    const newCustomLabelInput = document.getElementById('newCustomLabel');
+    const newCustomValueInput = document.getElementById('newCustomValue');
+    const customFieldsList = document.getElementById('additionalFieldsList');
+    const customFieldsState = [];
     const statusMessage = document.getElementById('statusMessage');
     const telegramUser = Telegram.WebApp.initDataUnsafe.user;
     const telegramChat = Telegram.WebApp.initDataUnsafe.chat;
@@ -34,23 +37,59 @@ document.addEventListener('DOMContentLoaded', function() {
         contentLengthSelect.appendChild(option);
     });
 
-    // Add custom field functionality
-    addFieldButton.addEventListener('click', function() {
-        const fieldGroup = document.createElement('div');
-        fieldGroup.classList.add('custom-field-group');
-        
-        fieldGroup.innerHTML = `
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <input type="text" class="custom-field-label" placeholder="اسم الحقل (مثال: الصف)" style="flex: 1; min-width: 150px;">
-                <input type="text" class="custom-field-value" placeholder="قيمة الحقل (مثال: الثالث الابتدائي)" style="flex: 1; min-width: 150px;">
-                <button type="button" class="remove-field-button">إزالة</button>
-            </div>
-        `;
-        customFieldsContainer.appendChild(fieldGroup);
+    function renderCustomFields() {
+        customFieldsList.innerHTML = '';
+        customFieldsState.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.classList.add('custom-field-row');
+            row.style.display = 'flex';
+            row.style.gap = '10px';
+            row.style.alignItems = 'center';
+            row.style.flexWrap = 'wrap';
+            row.style.marginTop = '8px';
 
-        fieldGroup.querySelector('.remove-field-button').addEventListener('click', function() {
-            fieldGroup.remove();
+            const labelEl = document.createElement('input');
+            labelEl.type = 'text';
+            labelEl.value = item.label;
+            labelEl.readOnly = true;
+            labelEl.style.flex = '1';
+            labelEl.style.minWidth = '150px';
+
+            const valueEl = document.createElement('input');
+            valueEl.type = 'text';
+            valueEl.value = item.value;
+            valueEl.readOnly = true;
+            valueEl.style.flex = '1';
+            valueEl.style.minWidth = '150px';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'إزالة';
+            removeBtn.addEventListener('click', function() {
+                customFieldsState.splice(index, 1);
+                renderCustomFields();
+            });
+
+            row.appendChild(labelEl);
+            row.appendChild(valueEl);
+            row.appendChild(removeBtn);
+            customFieldsList.appendChild(row);
         });
+    }
+
+    addCustomFieldBtn.addEventListener('click', function() {
+        const label = newCustomLabelInput.value.trim();
+        const value = newCustomValueInput.value.trim();
+        if (!label || !value) {
+            statusMessage.textContent = 'يرجى إدخال اسم الحقل وقيمته قبل الإضافة.';
+            statusMessage.style.color = 'red';
+            return;
+        }
+        customFieldsState.push({ label, value });
+        newCustomLabelInput.value = '';
+        newCustomValueInput.value = '';
+        statusMessage.textContent = '';
+        renderCustomFields();
     });
 
     form.addEventListener('submit', async function(event) {
@@ -73,12 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         const customFields = {};
-        document.querySelectorAll('.custom-field-group').forEach(group => {
-            const label = group.querySelector('.custom-field-label').value;
-            const value = group.querySelector('.custom-field-value').value;
-            if (label && value) {
-                customFields[label] = value;
-            }
+        customFieldsState.forEach(item => {
+            customFields[item.label] = item.value;
         });
 
         const requestData = {
@@ -107,15 +142,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             console.log('Response status:', response.status);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            let result = null;
+            try {
+                result = await response.json();
+            } catch (_) {
+                // ignore JSON parse errors; will fall back to status text
             }
-            
-            const result = await response.json();
             console.log('Response result:', result);
 
-            if (response.ok) {
+            if (response.ok && result && result.status === 'success') {
                 statusMessage.textContent = 'تم إرسال طلبك بنجاح! تحقق من بوت تليجرام الخاص بك للحصول على المحتوى.';
                 statusMessage.style.color = 'green';
                 
@@ -125,14 +160,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.Telegram.WebApp.close();
                     }
                 }, 2000);
-            } else if (response.status === 402 && result.invoice_sent) {
+            } else if (response.status === 402 && result && result.invoice_sent) {
                 statusMessage.textContent = 'يرجى إتمام عملية الدفع في تليجرام للحصول على المحتوى المميز.';
                 statusMessage.style.color = 'orange';
                 if (result.invoice_url && window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.openInvoice(result.invoice_url);
                 }
             } else {
-                statusMessage.textContent = `خطأ: ${result.detail || result.message || 'حدث خطأ غير معروف.'}`;
+                const detail = (result && (result.detail || result.message)) || `HTTP ${response.status}`;
+                statusMessage.textContent = `خطأ: ${detail}`;
                 statusMessage.style.color = 'red';
             } 
         } catch (error) {

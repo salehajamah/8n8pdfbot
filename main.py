@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any
-import openai
+from openai import AsyncOpenAI
 import telegram
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, PreCheckoutQueryHandler
@@ -69,8 +69,8 @@ templates = Jinja2Templates(directory="static")
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI
-openai.api_key = OPENAI_API_KEY
+// Initialize OpenAI
+client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 # Initialize Redis for caching and rate limiting
 try:
@@ -139,19 +139,17 @@ async def start_polling():
 
 async def generate_openai_content(prompt: str, model: str = "gpt-3.5-turbo", temperature: float = 0.7, max_tokens: int = 1000) -> str:
     try:
-        response = await openai.ChatCompletion.acreate(
+        response = await client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
             temperature=temperature,
             max_tokens=max_tokens,
         )
         return response.choices[0].message.content.strip()
-    except openai.error.OpenAIError as e:
+    except Exception as e:
         logger.error(f"OpenAI API error: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في خدمة الذكاء الاصطناعي: {e}")
-    except Exception as e:
-        logger.error(f"An unexpected error occurred during OpenAI call: {e}")
-        raise HTTPException(status_code=500, detail="حدث خطأ غير متوقع أثناء توليد المحتوى.")
+    
 
 async def get_user_daily_requests(user_id: int) -> int:
     if redis_client:
