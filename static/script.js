@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Populate content length dropdown
-    const contentLengths = ["موجز جدًا", "مختصر", "متوسط", "مفصل", "شامل"];
+    const contentLengths = ["موجز جداً", "مختصر", "متوسط", "مفصل", "شامل"];
     const contentLengthSelect = document.getElementById('contentLength');
     contentLengths.forEach(length => {
         const option = document.createElement('option');

@@ -16,7 +16,7 @@ import logging
 import asyncio
 import json
 import uuid
-import redis
+import redis.asyncio as redis
 from fpdf import FPDF
 
 # Load environment variables from .env file
@@ -75,9 +75,12 @@ openai.api_key = OPENAI_API_KEY
 # Initialize Redis for caching and rate limiting
 try:
     redis_client = redis.from_url(REDIS_URL)
-    redis_client.ping() # Test connection
+    awaitable_ping = redis_client.ping()
+    # Handle both coroutine (async client) and direct bool (in case of misconfig)
+    if asyncio.iscoroutine(awaitable_ping):
+        awaitable_ping = asyncio.get_event_loop().run_until_complete(awaitable_ping)
     logger.info("Successfully connected to Redis!")
-except redis.exceptions.ConnectionError as e:
+except Exception as e:
     logger.error(f"Could not connect to Redis: {e}. Caching and rate limiting will be disabled.")
     redis_client = None
 
@@ -195,10 +198,8 @@ async def generate_pdf(html_content: str, is_free_version: bool = True) -> bytes
         text = re.sub('<[^<]+?>', '', html_content)
         pdf.multi_cell(0, 10, txt=text)
         import io
-        pdf_bytes = io.BytesIO()
-        pdf.output(pdf_bytes)
-        pdf_bytes.seek(0)
-        return pdf_bytes.read()
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+        return pdf_bytes
     except Exception as e:
         logger.error(f"Error generating PDF: {e}")
         raise HTTPException(status_code=500, detail="حدث خطأ أثناء توليد ملف PDF.")
